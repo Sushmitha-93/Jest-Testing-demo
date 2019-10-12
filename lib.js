@@ -30,6 +30,7 @@ module.exports.registerUser = function(username) {
 
 // Mock functions
 module.exports.applyDiscount = function(order) {
+  // we will need to replace getCustSync function call to db with a mock function in test file for unit testing
   const customer = db.getCustomerSync(order.customerId);
 
   if (customer.points > 10) order.totalPrice *= 0.9;

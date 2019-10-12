@@ -3,8 +3,10 @@ const {
   greet,
   getCurrencies,
   getProduct,
-  registerUser
+  registerUser,
+  applyDiscount
 } = require("../lib");
+const db = require("../db"); // requireing db module to replace its functions with fake mock functions in each tests
 
 // Testing absolute function in lib.js. It's got 3 paths, so we need to define atleast 3 tests.
 describe("Absolute", () => {
@@ -49,8 +51,7 @@ describe("Get product", () => {
   });
 });
 
-// Testing exceptions
-// null, undefined, NaN, '',0, false
+// Testing exceptions - null, undefined, NaN, '',0, false
 describe("Register user", () => {
   it("should throw error if the username is falsy", () => {
     const args = [null, undefined, NaN, "", 0, false];
@@ -58,6 +59,21 @@ describe("Register user", () => {
       expect(() => {
         registerUser(i);
       }).toThrow();
+    });
+  });
+
+  // Testing Function that calls database
+  describe("Apply discount", () => {
+    it("should apply 10% discount to order price if customer points is greater than 10", () => {
+      // Replacing db function with fake mock function. (First required db module having that function)
+      db.getCustomerSync = function(customerId) {
+        console.log("Fake reading customer");
+        return { id: customerId, points: 11 };
+      };
+
+      const order = { customerId: "123", totalPrice: 100 };
+      applyDiscount(order);
+      expect(order.totalPrice).toBe(90);
     });
   });
 });
