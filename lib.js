@@ -36,7 +36,7 @@ module.exports.applyDiscount = function(order) {
   if (customer.points > 10) order.totalPrice *= 0.9;
 };
 
-// Mock functions
+// Mock functions (Interaction testing)
 module.exports.notifyCustomer = function(order) {
   const customer = db.getCustomerSync(order.customerId);
 

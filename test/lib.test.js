@@ -4,9 +4,11 @@ const {
   getCurrencies,
   getProduct,
   registerUser,
-  applyDiscount
+  applyDiscount,
+  notifyCustomer
 } = require("../lib");
 const db = require("../db"); // requireing db module to replace its functions with fake mock functions in each tests
+const mail = require("../mail");
 
 // Testing absolute function in lib.js. It's got 3 paths, so we need to define atleast 3 tests.
 describe("Absolute", () => {
@@ -65,15 +67,49 @@ describe("Register user", () => {
   // Testing Function that calls database
   describe("Apply discount", () => {
     it("should apply 10% discount to order price if customer points is greater than 10", () => {
-      // Replacing db function with fake mock function. (First required db module having that function)
+      // Replacing REAL db function with fake MOCK function.(First required db module having that function)
+
+      /* Manual MOCK function
       db.getCustomerSync = function(customerId) {
         console.log("Fake reading customer");
         return { id: customerId, points: 11 };
       };
-
+      */
       const order = { customerId: "123", totalPrice: 100 };
+      // Jest MOCK function
+      db.getCustomerSync = jest
+        .fn()
+        .mockReturnValue({ id: order.customerId, points: 11 });
+
       applyDiscount(order);
       expect(order.totalPrice).toBe(90);
     });
+  });
+});
+
+// Testing interaction with getCustomer and mail.send
+describe("notify customer", () => {
+  it("should interact with getCustomer and mail.send functions", () => {
+    /* // Manual mock function
+    db.getCustomerSync = function(customerId) {
+      console.log("fake reading customer");
+      return { id: customerId, points: 10 };
+    };
+
+    let mailSent = false;
+    // Manual mock function
+    mail.send = function(email, message) {
+      mailSent = true;
+    };
+   */
+
+    db.getCustomerSync = jest.fn().mockReturnValue({ email: "abc" });
+    mail.send = jest.fn();
+
+    notifyCustomer({ customerId: "1" });
+
+    expect(mail.send).toHaveBeenCalled();
+    expect(mail.send.mock.calls[0][0]).toBe("abc");
+    expect(mail.send.mock.calls[0][1]).toMatch(/order/);
   });
 });
